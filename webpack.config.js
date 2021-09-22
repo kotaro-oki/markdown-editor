@@ -12,7 +12,7 @@ module.exports = {
       ],
     },
     resolve: {
-      extensions: ['.js','.ts','.tsx'],
+        extensions: ['.js', '.ts', '.tsx'],
     },
     output: {
       path: path.resolve(__dirname, 'dist'),
@@ -20,9 +20,12 @@ module.exports = {
       publicPath: 'dist/',
     },
     devServer: {
+      static: {
+          directory: path.join(__dirname, 'dist'),
+      },
       hot: true,
       open: true,
-    //   historyApiFallback: true,
+      historyApiFallback: true,
     }
     
 }
