@@ -47,7 +47,7 @@ export const Editor: React.FC = () => {
   return (
     <>
       <Header>
-        Markdown Editor
+        Markdown Editorこれはえditor.tsxの
       </Header>
       <Wrapper>
         <TextArea value="テキスト入力エリア" />
