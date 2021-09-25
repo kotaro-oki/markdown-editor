@@ -1,16 +1,21 @@
 import * as React from 'react'
 import styled from 'styled-components'
 
-const Header = styled.header`
-  font-size: 1.5rem;
-  height: 2rem;
-  left: 0;
-  line-height: 2rem;
-  padding: 0.5rem 1rem;
-  position: fixed;
-  right: 0;
-  top: 0;
-`
+import { useStateWithStorage } from '../hooks/use_state_with_storage'
+
+import { putMemo } from '../indexeddb/memos'
+import { Button } from '../components/button'
+import { SaveModal } from '../components/save_modal'
+import { Link } from 'react-router-dom'
+import { Header } from '../components/header'
+
+import ConvertMarkdownWorker from 'worker-loader!../worker/convert_markdown_worker'
+const convertMarkdownWorker = new ConvertMarkdownWorker()
+
+const { useState, useEffect } = React
+
+
+// react.useStateはオブジェクトや！それを切り出して使ってるだけhy！
 
 const Wrapper = styled.div`
   bottom: 0;
@@ -18,6 +23,15 @@ const Wrapper = styled.div`
   position: fixed;
   right: 0;
   top: 3rem;
+`
+
+ 
+
+const HeaderArea = styled.div`
+  position: fixed;
+  right: 0;
+  top: 0;
+  left: 0;
 `
 
 const TextArea = styled.textarea`
@@ -43,16 +57,58 @@ const Preview = styled.div`
   width: 50vw;
 `
 
-export const Editor: React.FC = () => {
+interface props {
+    text: string
+    setText: (text: string) => void
+}
+
+export const Editor: React.FC<props> = (props) => {
+    const {text,setText} = props
+  const [showModal, setShowModal] = useState(false)
+  const [html, setHtml] = useState('')
+
+
+
+  useEffect(() => {
+    convertMarkdownWorker.onmessage = (event) => {
+      setHtml(event.data.html)
+    }
+  }, [])
+
+  useEffect(() => {
+    convertMarkdownWorker.postMessage(text)
+  }, [text])
+
   return (
     <>
-      <Header>
-        Markdown Editorこれはえditor.tsxの
-      </Header>
+      <HeaderArea>
+        <Header title='Markdown props keiyu'>
+            <Button onClick={() => setShowModal(true)}>
+                保存する
+            </Button>
+            <Link to='/history'>
+                履歴を見る
+            </Link>
+        </Header>
+      </HeaderArea>
       <Wrapper>
-        <TextArea value="テキスト入力エリア" />
-        <Preview>プレビューエリア</Preview>
+        <TextArea value={text} onChange={(e) => {
+            setText(e.target.value)
+        }}
+        />
+        <Preview>
+            <div dangerouslySetInnerHTML={{ __html: html }} />
+        </Preview>
       </Wrapper>
+      {showModal && (
+        <SaveModal
+          onSave={(title: string): void => {
+            putMemo(title, text)
+            setShowModal(false)
+          }}
+          onCancel={() => setShowModal(false)}
+        />
+      )}
     </>
   )
 }

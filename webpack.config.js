@@ -1,6 +1,7 @@
 const path = require('path')
 
 module.exports = {
+    target: ['web', 'es5'],
     entry: './src/index.tsx',
     module: {
       rules: [
@@ -14,6 +15,9 @@ module.exports = {
     resolve: {
         extensions: ['.js', '.ts', '.tsx'],
     },
+    // __dirnameが実行しているファイルのパス、 process.cwd()は現在のディレクトリのパス
+    // Windowsとかだとパス区切りが/じゃないこともあるみたい。バックスラッシュっていうやつ（\）。
+    // だから__dirname + '/src'だとパスがおかしくなってしまうことがあるからpath.resolveを使って安心安全で行こうぜ！ってことらしい。
     output: {
       path: path.resolve(__dirname, 'dist'),
       filename: 'index.js',
